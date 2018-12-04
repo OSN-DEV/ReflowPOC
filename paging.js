@@ -6,23 +6,33 @@ var scrollPosList = [];
 
 $(document).ready(function () {
 	// var pageWidth =  window.innerWidth;
-	var pageWidth = $(window).width();
+	var pageWidth = $(window).width() - parseInt($('body').css('padding-left'));
+	var paddingRight = parseInt($('body').css('padding-right'));
+	debugLog('page width   :%d',pageWidth);
+	// debugLog('padding-right:%s', $('body').css('padding-right'));
+	// debugLog('padding-left :%s', $('body').css('padding-left'));
+
+
+	// スクロール位置として先頭の0を追加
 	scrollPosList.push(0);
 	var elm;
 
-	debugLog('page width:%d',pageWidth);
-	debugLog($('body').css('padding-right'));
 
-	var width = parseInt($('body').css('padding-right'));
+	var width = paddingRight;
 	// width = parseInt($('body').css('padding-right'));
 	var children = $('div.main').children();
 	$.each(children, function(index, domElm) {
+
+
+
 		var elm = $(domElm);
 		var outerWidth = elm.outerWidth(true);
 		var tagName = elm.prop("tagName");
 
+		// debugLog("#### [%d] %s", index, elm.html().substr(0, 10));
+
 		// ページの先頭が<br>から開始させない
-		if ((width + outerWidth <= pageWidth) || 
+		if ((width + outerWidth < pageWidth) || 
 			(tagName.toLowerCase() === "br")) {
 			width += outerWidth;
 			return true;
@@ -34,7 +44,7 @@ $(document).ready(function () {
 			elm.before('<br>');
 			elm = elm.before();
 			setScrollPos();
-			width = outerWidth;
+			width = paddingRight + outerWidth;
 			return true;
 		}
 
@@ -88,19 +98,25 @@ $(document).ready(function () {
 		if (elm.text().length == 0) {
 			elm.remove();
 		}
-		width = elm.outerWidth();
+		width = paddingRight + elm.outerWidth();
 
 		function needNewPage(html) {
+
 			elm.html(html);
+// debugLog(html);
+// debugLog(width);
+// debugLog(elm.outerWidth());
 			return (pageWidth < width + elm.outerWidth());
 		}
 		function createNewPage(innerHtml) {
+			debugLog('#createNewPage!!! width:%d', width);
+
 			elm.html(innerHtml);
 			// 中途半端に次ページの先頭に表示する行が末尾に表示されるのを防ぐために<br>を追加
 			elm.after('<br>');
 			elm = elm.next();
 			setScrollPos();
-			width = 0;
+			width = paddingRight;
 			// 現在の要素をインデントなしの<p>に変更
 			elm.after('<p style="text-indent:0;"></p>');
 			elm = elm.next();
